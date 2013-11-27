@@ -20,8 +20,8 @@ class Surface:
 			
 		self.__equivalence_distance  = equivalence_distance
 		self.__polygons_records      = []
-		self.__minimal_impassability = None
-		self.__maximal_impassability = None
+		self.__minimal_impossibility = None
+		self.__maximal_impossibility = None
 		
 		
 		
@@ -42,13 +42,13 @@ class Surface:
 		
 		
 	@property
-	def minimal_impassability(self):
-		return self.__minimal_impassability
+	def minimal_impossibility(self):
+		return self.__minimal_impossibility
 		
 		
 	@property
-	def maximal_impassability(self):
-		return self.__maximal_impassability
+	def maximal_impossibility(self):
+		return self.__maximal_impossibility
 		
 		
 	#!!!!! relations_classes
@@ -160,20 +160,20 @@ class Surface:
 			self.__polygons_records.insert(polygon_record_index, polygon_record)
 			
 			
-			if self.__minimal_impassability is None:
-				self.__minimal_impassability = polygon.impassability
-				self.__maximal_impassability = polygon.impassability
+			if self.__minimal_impossibility is None:
+				self.__minimal_impossibility = polygon.impossibility
+				self.__maximal_impossibility = polygon.impossibility
 			else:
-				self.__minimal_impassability = \
+				self.__minimal_impossibility = \
 					min(
-						self.__minimal_impassability,
-						polygon.impassability
+						self.__minimal_impossibility,
+						polygon.impossibility
 					)
 					
-				self.__maximal_impassability = \
+				self.__maximal_impossibility = \
 					max(
-						self.__maximal_impassability,
-						polygon.impassability
+						self.__maximal_impossibility,
+						polygon.impossibility
 					)
 		else:
 			raise Exception() #!!!!!
@@ -204,40 +204,40 @@ class Surface:
 	# 		self.__polygons.remove(existing_polygon)
 			
 			
-	# 		if polygon.impassability == self.__minimal_impassability:
-	# 			is_impassability_extreme = True
-	# 		elif polygon.impassability == self.__maximal_impassability:
-	# 			is_impassability_extreme = True
+	# 		if polygon.impossibility == self.__minimal_impossibility:
+	# 			is_impossibility_extreme = True
+	# 		elif polygon.impossibility == self.__maximal_impossibility:
+	# 			is_impossibility_extreme = True
 	# 		else:
-	# 			is_impassability_extreme = False
+	# 			is_impossibility_extreme = False
 				
 				
-	# 		if is_impassability_extreme:
+	# 		if is_impossibility_extreme:
 	# 			if self.__polygons:
 	# 				polygons_iterator = iter(self.__polygons)
 					
 					
 	# 				polygon = next(polygons_iterator)
 					
-	# 				self.__minimal_impassability = polygon.impassability
-	# 				self.__maximal_impassability = polygon.impassability
+	# 				self.__minimal_impossibility = polygon.impossibility
+	# 				self.__maximal_impossibility = polygon.impossibility
 					
 					
 	# 				for polygon in polygons_iterator:
-	# 					self.__minimal_impassability = \
+	# 					self.__minimal_impossibility = \
 	# 						min(
-	# 							self.__minimal_impassability,
-	# 							polygon.impassability
+	# 							self.__minimal_impossibility,
+	# 							polygon.impossibility
 	# 						)
 							
-	# 					self.__maximal_impassability = \
+	# 					self.__maximal_impossibility = \
 	# 						max(
-	# 							self.__maximal_impassability,
-	# 							polygon.impassability
+	# 							self.__maximal_impossibility,
+	# 							polygon.impossibility
 	# 						)
 	# 			else:
-	# 				self.__minimal_impassability  = None
-	# 				self.__maximal_impassability  = None
+	# 				self.__minimal_impossibility  = None
+	# 				self.__maximal_impossibility  = None
 	# 	else:
 	# 		raise Exception() #!!!!!
 			

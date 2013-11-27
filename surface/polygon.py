@@ -29,7 +29,7 @@ def compute_points_distance(first_point, second_point):
 	
 def match_coordinates(first_coordinates,
 						second_coordinates,
-						equivalence_distance):
+						equivalence_distance = 0.0):
 	square_distance = 0.0
 	
 	for coordinates in zip(first_coordinates, second_coordinates):
@@ -54,7 +54,7 @@ def match_coordinates(first_coordinates,
 	
 	
 	
-def match_polygons(first_polygon, second_polygon, equivalence_distance):
+def match_polygons(first_polygon, second_polygon, equivalence_distance = 0.0):
 	def match_implication(antecedent_vertices, consequent_vertices):
 		for antecedent_vertex in antecedent_vertices:
 			for consequent_vertex in consequent_vertices:
@@ -116,7 +116,7 @@ def match_polygons(first_polygon, second_polygon, equivalence_distance):
 	
 	
 	
-def match_points(first_point, second_point, equivalence_distance):
+def match_points(first_point, second_point, equivalence_distance = 0.0):
 	are_polygons_equivalent = \
 		match_polygons(
 			first_point.polygon,
