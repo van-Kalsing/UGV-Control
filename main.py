@@ -131,10 +131,10 @@ controls_sequence = None
 from surface_generation import generate_surface
 from surface_building import build_surface
 
-# start_time = round(time() * 1000)
-# generate_surface('surface.csv', 64, 64, 1.0)
-# end_time = round(time() * 1000)
-# print('Время генерации карты:  %s' % (end_time - start_time))
+start_time = round(time() * 1000)
+generate_surface('surface.csv', 16, 16, 1.0)
+end_time = round(time() * 1000)
+print('Время генерации карты:    %s' % (end_time - start_time))
 
 
 start_time = round(time() * 1000)
@@ -149,9 +149,8 @@ planning_parameters.initial_polygon = list(surface.polygons)[0]
 planning_parameters.final_polygon   = list(surface.polygons)[-1]
 
 planner = Planner(planning_parameters)
-controls_sequence_generator = planner.plan_controls_sequence()
 start_time = round(time() * 1000)
-controls_sequence = next(controls_sequence_generator)
+controls_sequence = planner.plan_controls_sequence()[0]
 end_time = round(time() * 1000)
 print('Время планирования пути:  %s' % (end_time - start_time))
 

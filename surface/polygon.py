@@ -29,7 +29,7 @@ def compute_points_distance(first_point, second_point):
 	
 def match_coordinates(first_coordinates,
 						second_coordinates,
-						equivalence_distance = 0.0):
+						equivalence_distance):
 	square_distance = 0.0
 	
 	for coordinates in zip(first_coordinates, second_coordinates):
@@ -54,7 +54,7 @@ def match_coordinates(first_coordinates,
 	
 	
 	
-def match_polygons(first_polygon, second_polygon, equivalence_distance = 0.0):
+def match_polygons(first_polygon, second_polygon, equivalence_distance):
 	def match_implication(antecedent_vertices, consequent_vertices):
 		for antecedent_vertex in antecedent_vertices:
 			for consequent_vertex in consequent_vertices:
@@ -116,7 +116,7 @@ def match_polygons(first_polygon, second_polygon, equivalence_distance = 0.0):
 	
 	
 	
-def match_points(first_point, second_point, equivalence_distance = 0.0):
+def match_points(first_point, second_point, equivalence_distance):
 	are_polygons_equivalent = \
 		match_polygons(
 			first_point.polygon,
@@ -144,7 +144,7 @@ def match_points(first_point, second_point, equivalence_distance = 0.0):
 	
 	
 class Polygon:
-	def __init__(self, vertices, impassability, *args, **kwargs):
+	def __init__(self, vertices, impossibility, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		
 		
@@ -169,7 +169,7 @@ class Polygon:
 		
 		self.__vertices        = vertices
 		self.__vertices_number = vertices_number
-		self.__impassability   = impassability
+		self.__impossibility   = impossibility
 		self.__center          = center
 		self.__center_module   = center_module
 		
@@ -186,8 +186,8 @@ class Polygon:
 		
 		
 	@property
-	def impassability(self):
-		return self.__impassability
+	def impossibility(self):
+		return self.__impossibility
 		
 		
 		

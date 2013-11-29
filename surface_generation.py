@@ -745,7 +745,7 @@ def disturb_surface_regularity(x_size, y_size):
 		# 	is_iteration_finished = True
 			
 			
-	for _ in range(points_number * 32):
+	for _ in range(points_number * 0):
 		point_record_index = randint(0, points_number - 1)
 		
 		minimize_point_force(point_record_index, minimal_point_offset_step)

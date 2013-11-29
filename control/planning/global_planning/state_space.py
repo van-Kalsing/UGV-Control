@@ -1,5 +1,6 @@
-from surface.polygon       import Edge, match_polygons
-from utilities.memoization import memoization
+from numpy           import array
+from numpy.linalg    import norm
+from surface.polygon import Edge, match_polygons
 
 
 
@@ -37,11 +38,10 @@ class State:
 		
 		
 		
-	@memoization
 	def __hash__(self):
 		#!!!!! Потом убрать array
 		polygon_center_norm = norm(array(self.__surface_polygon.center))
-		hash                = round(polygon_center_norm)
+		hash                = int(polygon_center_norm)
 		
 		return hash
 		
@@ -51,7 +51,8 @@ class State:
 			are_polygons_equivalent = \
 				match_polygons(
 					state.__surface_polygon,
-					self.__surface_polygon
+					self.__surface_polygon,
+					self.__surface.equivalence_distance
 				)
 		else:
 			are_polygons_equivalent = False
@@ -79,7 +80,6 @@ class State:
 		
 		
 		
-	@memoization
 	def __get_successors_map(self):
 		successors_map = dict()
 		
@@ -98,7 +98,7 @@ class State:
 				)
 				
 			adjacent_polygon_edge = polygon_relations[vertices_indexes]
-			adjacent_polygon      = adjacent_edge.polygon
+			adjacent_polygon      = adjacent_polygon_edge.polygon
 			
 			
 			successor = \
@@ -114,14 +114,12 @@ class State:
 		
 		
 		
-	def get_successors(self):
-		successors_map = self.__get_successors_map()
+	@property
+	def successors(self):
+		yield from self.__get_successors_map()
 		
-		for successor in successors_map:
-			yield successor
-			
-			
-			
+		
+		
 	def get_connecting_edge(self, successor):
 		successors_map  = self.__get_successors_map()
 		connecting_edge = successors_map.get(successor)
@@ -137,10 +135,13 @@ class State:
 		
 		
 	@property
-	@memoization
 	def estimation(self):
-		final_state = self.__planning_parameters.final_state
-		
+		final_state = \
+			State(
+				self.__planning_parameters.final_polygon,
+				self.__planning_parameters
+			)
+			
 		#!!!!! Потом убрать array
 		polygon_center       = array(self.__surface_polygon.center)
 		final_polygon_center = array(final_state.__surface_polygon.center)

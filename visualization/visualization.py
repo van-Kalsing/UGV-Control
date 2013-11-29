@@ -7,11 +7,11 @@ from svgwrite.shapes import Polygon, Circle, Line
 
 
 def create_svg(filename, surface, controls_sequence = None):
-	a = (0.0, 64.0, 0.0, 64.0)
-	b = (1500.0, 1500.0, 10.0)
+	a = (0.0, 16.0, 0.0, 16.0)
+	b = (500.0, 500.0, 10.0)
 
 
-	surface_view = Drawing(filename, size = (1500, 1500))
+	surface_view = Drawing(filename, size = (500, 500))
 	
 	
 	def correct_vertex(vertex, surface_bounds, canvas_bounds):
@@ -50,15 +50,15 @@ def create_svg(filename, surface, controls_sequence = None):
 				in  polygon.vertices]
 				
 				
-		if surface.maximal_impassability - surface.minimal_impassability > 0.0:
-			relative_impassability = \
-				(polygon.impassability - surface.minimal_impassability) \
-					/ (surface.maximal_impassability - surface.minimal_impassability)
+		if surface.maximal_impossibility - surface.minimal_impossibility > 0.0:
+			relative_impossibility = \
+				(polygon.impossibility - surface.minimal_impossibility) \
+					/ (surface.maximal_impossibility - surface.minimal_impossibility)
 		else:
-			relative_impassability = 0.0
+			relative_impossibility = 0.0
 			
-		fill_color_red_component   = round(255.0 * relative_impassability)
-		fill_color_green_component = round(255.0 - 255.0 * relative_impassability)
+		fill_color_red_component   = round(255.0 * relative_impossibility)
+		fill_color_green_component = round(255.0 - 255.0 * relative_impossibility)
 		fill_color_blue_component  = 0
 		fill_color                 = \
 			rgb(
@@ -81,7 +81,9 @@ def create_svg(filename, surface, controls_sequence = None):
 	if controls_sequence is not None:
 		last_polygon_center = None
 		
-		for polygon in controls_sequence:
+		for state in controls_sequence:
+			polygon = state.polygon
+			
 			polygon_center      = polygon.center[0], polygon.center[1]
 			polygon_center_view = \
 				Circle(
