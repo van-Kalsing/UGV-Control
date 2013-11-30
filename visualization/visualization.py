@@ -6,12 +6,12 @@ from svgwrite.shapes import Polygon, Circle, Line
 
 
 
-def create_svg(filename, surface, controls_sequence = None):
-	a = (0.0, 16.0, 0.0, 16.0)
-	b = (500.0, 500.0, 10.0)
+def create_svg(filename, surface, controls_sequence = None, sn = None):
+	a = (0.0, 64.0, 0.0, 64.0)
+	b = (1500.0, 1500.0, 10.0)
 
 
-	surface_view = Drawing(filename, size = (500, 500))
+	surface_view = Drawing(filename, size = (1500, 1500))
 	
 	
 	def correct_vertex(vertex, surface_bounds, canvas_bounds):
@@ -78,6 +78,24 @@ def create_svg(filename, surface, controls_sequence = None):
 		surface_view.add(polygon_view)
 		
 		
+	if sn is not None:
+		from svgwrite.text import Text
+		for state in sn:
+			polygon = state.polygon
+			polygon_number = sn[state]
+			
+			polygon_center      = polygon.center[0], polygon.center[1]
+			q,w = correct_vertex(polygon_center, a, b)
+			polygon_center_view = \
+				Text(
+					str(polygon_number),
+					insert = (q+2,w+2),
+					style = "font-size: 30%; font-color: #808080"
+				)
+				
+			surface_view.add(polygon_center_view)
+			
+			
 	if controls_sequence is not None:
 		last_polygon_center = None
 		

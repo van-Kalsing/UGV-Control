@@ -1,5 +1,8 @@
-from control.planning.global_planning.state_space import State
-from queue                                        import PriorityQueue
+from control.planning.global_planning.state_space \
+	import State, \
+				compute_sequence_cost
+				
+from queue import PriorityQueue
 
 
 
@@ -131,14 +134,62 @@ class Planner:
 					node['state']
 				)
 				
-				node = node['predecessor']
-				
-				
-			return states_sequence, states_sequence_cost
+				try:
+					node = covered_states[next(iter(node['predecessors']))] #!!!!!
+				except:
+					break
+					
+					
+			return states_sequence, states_sequence_cost, sn #!!!!! Убрать sn
 			
 			
-		covered_states = dict()
-		
+			
+		def form_output_transfers(state):
+			output_transfers = list()
+			
+			
+			for output_transfer_successor in state.successors:
+				output_transfer_cost = \
+					compute_sequence_cost(
+						[state, output_transfer_successor],
+						self.__planning_parameters
+					)
+					
+				output_transfer = \
+					{
+						'cost':        output_transfer_cost,
+						'predecessor': state,
+						'successor':   output_transfer_successor
+					}
+					
+				output_transfers.append(output_transfer)
+				
+				
+			return output_transfers
+			
+			
+		def form_successor_node(predecessor_node, transfer):
+			successor      = transfer['successor']
+			successor_node = dict()
+			
+			
+			successor_node['state']           = successor
+			successor_node['predecessors']    = { predecessor_node['state'] }
+			successor_node['input_transfers'] = [ transfer ]
+			
+			successor_node['cost'] = \
+				predecessor_node['cost'] \
+					+ transfer['cost']
+					
+			successor_node['output_transfers'] = \
+				form_output_transfers(
+					successor
+				)
+				
+				
+			return successor_node
+			
+			
 		initial_state = \
 			State(
 				self.__planning_parameters.initial_polygon,
@@ -152,65 +203,111 @@ class Planner:
 			)
 			
 			
-		initial_node  = \
+		initial_node = \
 			{
-				'state':       initial_state,
-				'cost':        0.0,
-				'estimation':  0, #initial_state.estimation,
-				'predecessor': None,
-				'successors':  list()
+				'state':            initial_state,
+				'cost':             0.0,
+				'predecessors':     set(),
+				'input_transfers':  set(),
+				'output_transfers': form_output_transfers(initial_state),
 			}
 			
-		nodes_number = 1
-		
-		
-		peripheral_nodes = PriorityQueue()
-		
-		peripheral_nodes.put(
-			(initial_node['cost'] + initial_node['estimation'], \
-				nodes_number,
-				initial_node)
-		)
-		
-		
-		while not peripheral_nodes.empty():
-			_, _, peripheral_node = peripheral_nodes.get()
-			
-			peripheral_node_state      = peripheral_node['state']
-			peripheral_node_cost       = peripheral_node['cost']
-			peripheral_node_successors = peripheral_node['successors']
+		covered_states = \
+			{
+				initial_state: initial_node
+			}
 			
 			
-			if peripheral_node_state not in covered_states:
-				if peripheral_node_state == final_state:
-					return form_states_sequence(peripheral_node)
-					
-					
-				covered_states[peripheral_node_state] = peripheral_node
+			
+		peripheral_transfers = PriorityQueue()
+		
+		nodes_number = 0
+		
+		for output_transfer in initial_node['output_transfers']:
+			nodes_number += 1
+			
+			peripheral_transfers.put(
+				(output_transfer['cost'] \
+						+ output_transfer['successor'].estimation, \
+					nodes_number,
+					output_transfer)
+			)
+			
+			
+		n = 0 #!!!!! Временно
+		sn = {} #!!!!! Временно
+		while not peripheral_transfers.empty():
+			_, _, transfer = peripheral_transfers.get()
+			
+			successor      = transfer['successor']
+			successor_node = covered_states.get(successor)
+			
+			
+			#!!!!! <Временно>
+			n+=1
+			if successor not in sn:
+				sn[successor] = [n] #!!!!! Временно
+			else:
+				sn[successor].append(n) #!!!!! Временно
+			#!!!!! </Временно>
+			if successor_node is None:
+				predecessor      = transfer['predecessor']
+				predecessor_node = covered_states[predecessor]
 				
-				for successor in peripheral_node_state.successors:
-					successor_node = \
-						{
-							'state':       successor,
-							'cost':        peripheral_node_cost + 1, #!!!!!
-							'estimation':  0, #successor.estimation,
-							'predecessor': peripheral_node,
-							'successors':  list()
-						}
-						
+				successor_node = \
+					form_successor_node(
+						predecessor_node,
+						transfer
+					)
+					
+				covered_states[successor] = successor_node
+				
+				for output_transfer in successor_node['output_transfers']:
 					nodes_number += 1
 					
-					
-					peripheral_node_successors.append(successor_node)
-					peripheral_nodes.put(
+					peripheral_transfers.put(
 						(successor_node['cost'] \
-								+ successor_node['estimation'], \
-							nodes_number, \
-							successor_node)
+								+ output_transfer['cost'] \
+								+ output_transfer['successor'].estimation, \
+							nodes_number,
+							output_transfer)
 					)
 			else:
 				pass #!!!!!
 				
 				
+			if successor == final_state:
+				return form_states_sequence(successor_node)
+				
+				
 		return None
-		
+		# for successor in peripheral_node_state.successors:
+		# 	crossing_cost = \
+		# 		compute_sequence_cost(
+		# 			(peripheral_node_state, \
+		# 				successor),
+		# 			self.__planning_parameters
+		# 		)
+				
+		# 	successor_node_cost = peripheral_node_cost + crossing_cost
+			
+			
+		# 	successor_node = \
+		# 		{
+		# 			'state':       successor,
+		# 			'cost':        successor_node_cost,
+		# 			'estimation':  successor.estimation,
+		# 			'predecessor': peripheral_node,
+		# 			'successors':  list()
+		# 		}
+				
+		# 	nodes_number += 1
+			
+			
+		# 	peripheral_node_successors.append(successor_node)
+		# 	peripheral_transfers.put(
+		# 		(successor_node['cost'] \
+		# 				+ successor_node['estimation'], \
+		# 			nodes_number, \
+		# 			successor_node)
+		# 	)

@@ -89,6 +89,29 @@ def e():
 				
 	return im
 	
+def g():
+	im = zeros((64, 64), dtype = float64)
+	
+	
+	def is_wall(h, v):
+		return h >= 59 and h <= 61 and v < 50
+		
+	# def is_wall(h, v):
+	# 	return h >= 40 and h <= 42 and v < 41 and v > 13
+		
+	# def is_another_wall(h, v):
+	# 	return v >= 40 and v <= 42 and h < 41 and h > 13
+		
+		
+	for v in range(64):
+		for h in range(64):
+			if is_wall(h, 64 - v):
+				im[v,h] = 4000.0
+			else:
+				im[v,h] = 1.0
+				
+	return im
+	
 impossibility_matrix = e()
 
 
