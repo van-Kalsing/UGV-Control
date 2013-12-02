@@ -132,10 +132,10 @@ sn = None
 from surface_generation import generate_surface
 from surface_building import build_surface
 
-start_time = round(time() * 1000)
-generate_surface('surface.csv', 64, 64, 1.0)
-end_time = round(time() * 1000)
-print('Время генерации карты:    %s' % (end_time - start_time))
+# start_time = round(time() * 1000)
+# generate_surface('surface.csv', 20, 20, 1.0)
+# end_time = round(time() * 1000)
+# print('Время генерации карты:    %s' % (end_time - start_time))
 
 
 start_time = round(time() * 1000)
@@ -147,12 +147,13 @@ print('Время загрузки карты:     %s' % (end_time - start_time)
 planning_parameters = PlanningParameters()
 planning_parameters.surface         = surface
 planning_parameters.initial_polygon = list(surface.polygons)[0]
-planning_parameters.final_polygon   = list(surface.polygons)[-1] #Polygon([(63.0, 0.0, 0.0), (64.0, 0.0, 0.0), (63.0, 1.0, 0.0)], 1.0)
+planning_parameters.final_polygon   = list(surface.polygons)[2] #Polygon([(63.0, 0.0, 0.0), (64.0, 0.0, 0.0), (63.0, 1.0, 0.0)], 1.0)
 
 planner = Planner(planning_parameters)
 start_time = round(time() * 1000)
-controls_sequence, _, sn = planner.plan_controls_sequence()
+controls_sequence, cost, sn = planner.plan_controls_sequence()
 end_time = round(time() * 1000)
 print('Время планирования пути:  %s' % (end_time - start_time))
+print('Стоимость пути:           %s' % cost)
 
 create_svg("test1.svg", surface, controls_sequence, sn)

@@ -1,6 +1,7 @@
-from numpy           import array
-from numpy.linalg    import norm
-from surface.polygon import Edge, match_polygons
+from numpy                 import array
+from numpy.linalg          import norm
+from surface.polygon       import Edge, match_polygons
+from utilities.memoization import memoization
 
 
 
@@ -34,16 +35,26 @@ class State:
 		self.__surface             = surface
 		self.__surface_polygon     = surface_polygon
 		
+		self.__hash               = memoization(self.__hash)
+		self.__estimation         = memoization(self.__estimation)
+		self.__get_successors_map = memoization(self.__get_successors_map)
 		
 		
 		
 		
-	def __hash__(self):
+		
+	def __hash(self):
 		#!!!!! Потом убрать array
 		polygon_center_norm = norm(array(self.__surface_polygon.center))
 		hash                = int(polygon_center_norm)
 		
 		return hash
+		
+		
+		
+	def __hash__(self):
+		return self.__hash()
+		
 		
 		
 	def __eq__(self, state):
@@ -60,6 +71,7 @@ class State:
 		return are_polygons_equivalent
 		
 		
+		
 	def __ne__(self, state):
 		return not self.__eq__(state)
 		
@@ -70,6 +82,7 @@ class State:
 	@property
 	def polygon(self):
 		return self.__polygon
+		
 		
 		
 	@property
@@ -134,8 +147,7 @@ class State:
 		
 		
 		
-	@property
-	def estimation(self):
+	def __estimation(self):
 		final_state = \
 			State(
 				self.__planning_parameters.final_polygon,
@@ -158,6 +170,12 @@ class State:
 		
 		
 		return estimation
+		
+		
+		
+	@property
+	def estimation(self):
+		return self.__estimation()
 		
 		
 		

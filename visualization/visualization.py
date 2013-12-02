@@ -7,7 +7,7 @@ from svgwrite.shapes import Polygon, Circle, Line
 
 
 def create_svg(filename, surface, controls_sequence = None, sn = None):
-	a = (0.0, 64.0, 0.0, 64.0)
+	a = (0.0, 20.0, 0.0, 20.0)
 	b = (1500.0, 1500.0, 10.0)
 
 
