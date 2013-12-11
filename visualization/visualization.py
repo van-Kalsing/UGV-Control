@@ -7,7 +7,7 @@ from svgwrite.shapes import Polygon, Circle, Line
 
 
 def create_svg(filename, surface, controls_sequence = None, sn = None):
-	a = (0.0, 20.0, 0.0, 20.0)
+	a = (0.0, 64.0, 0.0, 64.0)
 	b = (1500.0, 1500.0, 10.0)
 
 
@@ -90,7 +90,7 @@ def create_svg(filename, surface, controls_sequence = None, sn = None):
 				Text(
 					str(polygon_number),
 					insert = (q+2,w+2),
-					style = "font-size: 30%; font-color: #808080"
+					style = "font-size: 50%; font-color: #808080"
 				)
 				
 			surface_view.add(polygon_center_view)
@@ -100,7 +100,7 @@ def create_svg(filename, surface, controls_sequence = None, sn = None):
 		last_polygon_center = None
 		
 		for state in controls_sequence:
-			polygon = state.polygon
+			polygon = state.polygons_sequence[-1]
 			
 			polygon_center      = polygon.center[0], polygon.center[1]
 			polygon_center_view = \

@@ -401,23 +401,24 @@ class Surface:
 		
 		for existing_relation_key in existing_relations:
 			if existing_relation_key[::-1] not in relations_keys:
-				edge = \
+				existing_edge = \
 					Edge(
 						existing_polygon,
 						existing_relation_key[0],
 						existing_relation_key[1]
 					)
 					
-				edge = self.__map_edge(edge, polygon)
+				edge = self.__map_edge(existing_edge, polygon)
 				
-				
-				relation_key = \
-					edge.first_vertex_index, \
-						edge.second_vertex_index
+				# relation_key = \
+				# 	edge.first_vertex_index, \
+				# 		edge.second_vertex_index
 						
-				relations[relation_key] = \
-					existing_relations[existing_relation_key]
+				# relations[relation_key] = \
+				# 	existing_relations[existing_relation_key]
 					
+				relations[edge] = existing_relations[existing_relation_key]
+				
 				relations_keys.add(existing_relation_key)
 				
 				

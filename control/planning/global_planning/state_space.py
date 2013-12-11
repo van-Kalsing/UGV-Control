@@ -1,6 +1,6 @@
 from numpy                 import array
 from numpy.linalg          import norm
-from surface.polygon       import Edge, match_polygons
+from surface.polygon       import match_polygons
 from utilities.memoization import memoization
 
 
@@ -10,34 +10,50 @@ from utilities.memoization import memoization
 
 
 class State:
-	def __init__(self, polygon, planning_parameters, *args, **kwargs):
+	def __init__(self, polygons_sequence, planning_parameters, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		
+		
+		#!!!!! 1. Послед-но ли распложены полигоны не проверять - долго считает
+		#!!!!!    (указать на это при документировании)
+		#!!!!! 2. Проверять число полигонов - оно должно быть равно
+		#!!!!!    соответствующему параметру в planning_parameters, также оно
+		#!!!!!    может быть меньше его в случае, если первый полигон стартовый
 		
 		if not planning_parameters.is_correct:
 			raise Exception() #!!!!!
 			
 		try:
-			surface_polygon = \
-				planning_parameters.surface \
-					.get_existing_polygon(
-						polygon
-					)
+			def get_existing_polygon(polygon):
+				existing_polygon = \
+					planning_parameters.surface \
+						.get_existing_polygon(
+							polygon
+						)
+						
+				return existing_polygon
+				
+			surface_polygons_sequence = \
+				[get_existing_polygon(polygon) for polygon \
+					in polygons_sequence]
 		except:
 			raise Exception() #!!!!!
 			
 		planning_parameters = planning_parameters.copy()
+		polygons_sequence   = list(polygons_sequence)
 		surface             = planning_parameters.surface
 		
 		
-		self.__planning_parameters = planning_parameters
-		self.__polygon             = polygon
-		self.__surface             = surface
-		self.__surface_polygon     = surface_polygon
+		self.__planning_parameters       = planning_parameters
+		self.__polygons_sequence         = polygons_sequence
+		self.__surface                   = surface
+		self.__surface_polygons_sequence = surface_polygons_sequence
 		
 		self.__hash               = memoization(self.__hash)
-		self.__estimation         = memoization(self.__estimation)
 		self.__get_successors_map = memoization(self.__get_successors_map)
+		self.__is_initial         = memoization(self.__is_initial)
+		self.__is_final           = memoization(self.__is_final)
+		self.__estimation         = memoization(self.__estimation)
 		
 		
 		
@@ -45,8 +61,14 @@ class State:
 		
 	def __hash(self):
 		#!!!!! Потом убрать array
-		polygon_center_norm = norm(array(self.__surface_polygon.center))
-		hash                = int(polygon_center_norm)
+		polygons_centers_total_norm = \
+			sum(
+				[norm(array(surface_polygon.center)) for surface_polygon \
+					in self.__surface_polygons_sequence]
+			)
+			
+		hash = int(polygons_centers_total_norm)
+		
 		
 		return hash
 		
@@ -59,16 +81,33 @@ class State:
 		
 	def __eq__(self, state):
 		if state.__planning_parameters == self.__planning_parameters:
-			are_polygons_equivalent = \
-				match_polygons(
-					state.__surface_polygon,
-					self.__surface_polygon,
-					self.__surface.equivalence_distance
-				)
+			def iterate_surface_polygons():
+				yield from \
+					zip(
+						self.__surface_polygons_sequence,
+						state.__surface_polygons_sequence
+					)
+					
+			for surface_polygons in iterate_surface_polygons():
+				first_surface_polygon, second_surface_polygon = surface_polygons
+				
+				are_polygons_equivalent = \
+					match_polygons(
+						first_surface_polygon,
+						second_surface_polygon,
+						self.__surface.equivalence_distance
+					)
+					
+				if not are_polygons_equivalent:
+					are_states_equivalent = False
+					break
+			else:
+				are_states_equivalent = True
 		else:
-			are_polygons_equivalent = False
+			are_states_equivalent = False
 			
-		return are_polygons_equivalent
+			
+		return are_states_equivalent
 		
 		
 		
@@ -80,8 +119,8 @@ class State:
 		
 		
 	@property
-	def polygon(self):
-		return self.__polygon
+	def polygons_sequence(self):
+		return list(self.__polygons_sequence)
 		
 		
 		
@@ -97,30 +136,34 @@ class State:
 		successors_map = dict()
 		
 		
-		polygon_relations = \
+		polygons_sequence_length = len(self.__polygons_sequence)
+		smoothing_depth          = self.__planning_parameters.smoothing_depth
+		
+		if polygons_sequence_length == smoothing_depth:
+			successor_polygons_sequence_base = self.__polygons_sequence[1:]
+		else:
+			successor_polygons_sequence_base = self.__polygons_sequence
+			
+			
+		last_polygon           = self.__polygons_sequence[-1]
+		last_polygon_relations = \
 			self.__surface.get_relations(
-				self.__polygon
+				last_polygon
 			)
 			
-		for vertices_indexes in polygon_relations:
-			polygon_edge = \
-				Edge(
-					self.__polygon,
-					first_vertex_index  = vertices_indexes[0],
-					second_vertex_index = vertices_indexes[1]
-				)
-				
-			adjacent_polygon_edge = polygon_relations[vertices_indexes]
-			adjacent_polygon      = adjacent_polygon_edge.polygon
 			
+		for transfer in last_polygon_relations.items():
+			adjacent_polygon_edge = transfer[1]
+			adjacent_polygon      = adjacent_polygon_edge.polygon
 			
 			successor = \
 				State(
-					adjacent_polygon,
+					successor_polygons_sequence_base \
+						+ [adjacent_polygon],
 					self.__planning_parameters
 				)
 				
-			successors_map[successor] = polygon_edge
+			successors_map[successor] = transfer
 			
 			
 		return successors_map
@@ -133,37 +176,82 @@ class State:
 		
 		
 		
-	def get_connecting_edge(self, successor):
-		successors_map  = self.__get_successors_map()
-		connecting_edge = successors_map.get(successor)
+	def get_transfer(self, successor):
+		successors_map = self.__get_successors_map()
+		transfer       = successors_map.get(successor)
 		
-		if connecting_edge is None:
+		if transfer is None:
 			raise Exception() #!!!!!
 			
 			
-		return connecting_edge
+		return transfer
+		
+		
+		
+		
+		
+	def __is_initial(self):
+		last_surface_polygon = self.__surface_polygons_sequence[-1]
+		
+		is_initial = \
+			match_polygons(
+				last_surface_polygon,
+				self.__planning_parameters.initial_polygon,
+				self.__surface.equivalence_distance
+			)
+			
+		return is_initial
+		
+		
+		
+	@property
+	def is_initial(self):
+		return self.__is_initial()
+		
+		
+		
+	def __is_final(self):
+		last_surface_polygon = self.__surface_polygons_sequence[-1]
+		
+		is_final = \
+			match_polygons(
+				last_surface_polygon,
+				self.__planning_parameters.final_polygon,
+				self.__surface.equivalence_distance
+			)
+			
+		return is_final
+		
+		
+		
+	@property
+	def is_final(self):
+		return self.__is_final()
 		
 		
 		
 		
 		
 	def __estimation(self):
-		final_state = \
-			State(
-				self.__planning_parameters.final_polygon,
-				self.__planning_parameters
-			)
-			
+		final_surface_polygon = \
+			self.__planning_parameters.surface \
+				.get_existing_polygon(
+					self.__planning_parameters.final_polygon
+				)
+				
+		last_surface_polygon = self.__surface_polygons_sequence[-1]
+		
+		
 		#!!!!! Потом убрать array
-		polygon_center       = array(self.__surface_polygon.center)
-		final_polygon_center = array(final_state.__surface_polygon.center)
+		last_polygon_center  = array(last_surface_polygon.center)
+		final_polygon_center = array(final_surface_polygon.center)
 		
 		
 		optimistic_impossibility = self.__surface.minimal_impossibility
 		optimistic_distance      = \
 			norm(
 				final_polygon_center \
-					- polygon_center
+					- last_polygon_center
 			)
 			
 		estimation = optimistic_impossibility * optimistic_distance
@@ -177,186 +265,3 @@ class State:
 	def estimation(self):
 		return self.__estimation()
 		
-		
-		
-		
-		
-		
-		
-def compute_sequence_cost(states_sequence, planning_parameters):
-	def get_interjacent_point_computer(edge):
-		#!!!!! Потом убрать array
-		first_point  = array(edge.first_vertex.coordinates)
-		second_point = array(edge.second_vertex.coordinates)
-		
-		def compute_interjacent_point(ratio):
-			interjacent_point = \
-				ratio * first_point \
-					+ (1.0 - ratio) * second_point
-					
-			return interjacent_point
-			
-			
-		return compute_interjacent_point
-		
-		
-	def compute_elementary_cost(impossibility, first_point, second_point):
-		points_distance = \
-			norm(
-				first_point \
-					- second_point
-			)
-			
-			
-		return impossibility * points_distance
-		
-		
-		
-	def get_base_cost_computer(polygon, edge):
-		compute_interjacent_point = \
-			get_interjacent_point_computer(
-				edge
-			)
-			
-		#!!!!! Потом убрать array
-		polygon_center = array(polygon.center)
-		
-		
-		def compute_base_cost(ratio):
-			point = compute_interjacent_point(ratio)
-			
-			base_cost = \
-				compute_elementary_cost(
-					polygon.impossibility,
-					polygon_center,
-					point
-				)
-				
-			return base_cost
-			
-			
-		return compute_base_cost
-		
-		
-	def get_transition_cost_computer(polygon, first_edge, second_edge):
-		compute_first_interjacent_point = \
-			get_interjacent_point_computer(
-				first_edge
-			)
-			
-		compute_second_interjacent_point = \
-			get_interjacent_point_computer(
-				second_edge
-			)
-			
-			
-		def compute_transition_cost(first_ratio, second_ratio):
-			first_point  = compute_first_interjacent_point(first_ratio)
-			second_point = compute_second_interjacent_point(second_ratio)
-			
-			transition_cost = \
-				compute_elementary_cost(
-					polygon.impossibility,
-					first_point,
-					second_point
-				)
-				
-			return transition_cost
-			
-			
-		return compute_transition_cost
-		
-		
-		
-	elementary_cost_computers = list()
-	
-	def compute_sequence_cost(ratios):
-		sequence_cost = \
-			sum(
-				[compute_elementary_cost(ratio) \
-					for compute_elementary_cost, ratio \
-					in  zip(elementary_cost_computers, ratios)]
-			)
-			
-		return sequence_cost
-		
-		
-	try:
-		states_sequence        = list(states_sequence)
-		states_sequence_length = len(states_sequence)
-		
-		for state_index in range(states_sequence_length):
-			current_state = states_sequence[state_index]
-			
-			
-			if state_index == 0:
-				next_state = states_sequence[state_index + 1]
-				
-				connecting_edge = \
-					current_state.get_connecting_edge(
-						next_state
-					)
-					
-					
-				cost_computer = \
-					get_base_cost_computer(
-						current_state.polygon,
-						connecting_edge
-					)
-					
-			elif state_index == states_sequence_length - 1:
-				previous_state = states_sequence[state_index - 1]
-				
-				connecting_edge = \
-					current_state.get_connecting_edge(
-						previous_state
-					)
-					
-					
-				cost_computer = \
-					get_base_cost_computer(
-						current_state.polygon,
-						connecting_edge
-					)
-					
-			else:
-				previous_state = states_sequence[state_index - 1]
-				next_state     = states_sequence[state_index + 1]
-				
-				first_connecting_edge = \
-					current_state.get_connecting_edge(
-						previous_state
-					)
-					
-				second_connecting_edge = \
-					current_state.get_connecting_edge(
-						next_state
-					)
-					
-					
-				cost_computer = \
-					get_transition_cost_computer(
-						current_state.polygon,
-						first_connecting_edge,
-						second_connecting_edge
-					)
-					
-					
-			elementary_cost_computers.append(cost_computer)
-	except:
-		raise Exception() #!!!!!
-		
-		
-		
-	ratios = [0.5] * len(elementary_cost_computers)
-	
-	#!!!!! Оптимизация коэффициентов. Параметры оптимизации такие как
-	#!!!!! погрешность, количество итерации и пр. должны быть размещены в
-	#!!!!! planning_parameters
-	
-	
-	
-	sequence_cost = compute_sequence_cost(ratios)
-	
-	return sequence_cost
-	

@@ -178,11 +178,14 @@ def get_polygon_impossibility(polygon_record_index, x_size, y_size):
 	
 precision_matrix = \
 	array(
-		[[0.001, 100.0, 1000.0, 0.001],
-		 [100.0, 0.001,  50.0, 0.001],
-		 [1000.0, 200.0, 1000.0, 100.0],
-		 [100.0, 0.0001,  50.0, 0.001]]
-	)
+		[[1.0]]
+	).reshape(1, 1)
+	# array(
+	# 	[[0.001, 100.0, 1000.0, 0.001],
+	# 	 [100.0, 0.001,  50.0, 0.001],
+	# 	 [1000.0, 200.0, 1000.0, 100.0],
+	# 	 [100.0, 0.0001,  50.0, 0.001]]
+	# )
 	# array(
 	# 	[[    1., 0.001,    1.,    1.,    1.,     1.,     1.],
 	# 	 [    1., 0.001,    1., 0.001, 0.001,  0.001,  0.001],
@@ -770,7 +773,7 @@ def disturb_surface_regularity(x_size, y_size):
 		# 	is_iteration_finished = True
 			
 			
-	for _ in range(points_number * 10):
+	for _ in range(points_number * 0):
 		point_record_index = randint(0, points_number - 1)
 		
 		minimize_point_force(point_record_index, minimal_point_offset_step)
