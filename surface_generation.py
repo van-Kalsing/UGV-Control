@@ -436,7 +436,7 @@ def disturb_surface_regularity(x_size, y_size):
 	def compute_point_force(point_record_index):
 		def compute_point_force_component(polygon_record_index):
 			polygon_record         = polygons_records[polygon_record_index]
-			points_records_indexes = polygon_record['points']
+			points_records_indexes = list(polygon_record['points'])
 			
 			while points_records_indexes[0] != point_record_index:
 				first_point_record_index = points_records_indexes.pop(0)
@@ -597,7 +597,7 @@ def disturb_surface_regularity(x_size, y_size):
 		
 		
 		polygon_record         = polygons_records[polygon_record_index]
-		points_records_indexes = polygon_record['points']
+		points_records_indexes = list(polygon_record['points'])
 		
 		points = \
 			[points_records[point_record_index]['coordinates'] \
@@ -773,7 +773,7 @@ def disturb_surface_regularity(x_size, y_size):
 		# 	is_iteration_finished = True
 			
 			
-	for _ in range(points_number * 0):
+	for _ in range(points_number * 20):
 		point_record_index = randint(0, points_number - 1)
 		
 		minimize_point_force(point_record_index, minimal_point_offset_step)
@@ -819,8 +819,8 @@ def write_csv_file(file_name, x_size, y_size):
 		
 		for polygon_record_index in range(polygons_number):
 			polygon_record    = polygons_records[polygon_record_index]
-			polygon_points    = polygon_record['points']
-			polygon_relations = polygon_record['relations']
+			polygon_points    = list(polygon_record['points'])
+			polygon_relations = dict(polygon_record['relations'])
 			
 			
 			def form_vertex_record(point_record_index):

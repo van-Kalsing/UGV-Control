@@ -131,10 +131,10 @@ controls_sequence = None
 from surface_generation import generate_surface
 from surface_building import build_surface
 
-# start_time = round(time() * 1000)
-# generate_surface('surface.csv', 64, 64, 1.0)
-# end_time = round(time() * 1000)
-# print('Время генерации карты:    %s' % (end_time - start_time))
+start_time = round(time() * 1000)
+generate_surface('surface.csv', 40, 40, 1.0)
+end_time = round(time() * 1000)
+print('Время генерации карты:    %s' % (end_time - start_time))
 
 
 start_time = round(time() * 1000)

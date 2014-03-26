@@ -1,6 +1,7 @@
-from collections  import deque
-from numpy        import array
-from numpy.linalg import norm
+from collections     import deque
+from numpy           import array
+from numpy.linalg    import norm
+from surface.polygon import Point
 
 
 
@@ -359,7 +360,7 @@ class Smoother:
 						maximal_error
 					)
 					
-			need_minimization = maximal_error > 0.1
+			need_minimization = maximal_error > 0.1 #!!!!! Вынести константу
 			
 			
 		self.__is_ratios_sequence_minimized = True
@@ -390,4 +391,47 @@ class Smoother:
 			raise Exception() #!!!!!
 			
 		return transfer_cost
+		
+		
+		
+	#!!!!! Проверить корректность и согласованность с другим кодом
+	@property
+	def transfers_points_sequence(self):
+		if self.__transfers_sequence:
+			if not self.__is_ratios_sequence_minimized:
+				self.__minimize_ratios_sequence()
+				
+				
+			transfers_points_sequence = list()
+			transfers_sequence        = \
+				zip(
+					self.__transfers_sequence,
+					self.__ratios_sequence
+				)
+				
+			for transfer, ratio in transfers_sequence:
+				def get_tranfer_point(connecting_edge):
+					polygon       = connecting_edge.polygon
+					decomposition = \
+						[
+							(connecting_edge.first_vertex_index, ratio),
+							(connecting_edge.second_vertex_index, 1.0 - ratio)
+						]
+						
+					tranfer_point = Point(polygon, decomposition)
+					
+					return tranfer_point
+					
+					
+				first_connecting_edge, second_connecting_edge = transfer
+				
+				transfers_points_sequence.append(
+					(get_tranfer_point(first_connecting_edge), \
+						get_tranfer_point(second_connecting_edge))
+				)
+		else:
+			raise Exception() #!!!!!
+			
+			
+		return transfers_points_sequence
 		

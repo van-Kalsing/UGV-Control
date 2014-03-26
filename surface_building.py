@@ -1,6 +1,6 @@
 from csv             import reader
 from re              import compile
-from surface.polygon import Polygon, Edge
+from surface.polygon import Polygon, Edge, invert_edge
 from surface.surface import Surface
 
 
@@ -111,7 +111,7 @@ def build_surface(file_name, equivalence_distance):
 			surface.add_polygon(polygon)
 			
 			for first_edge, second_edge in relations:
-				surface.set_relation(first_edge, second_edge)
+				surface.set_relation(first_edge, invert_edge(second_edge))
 				
 				
 			polygons.append(polygon)

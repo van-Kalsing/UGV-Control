@@ -1,13 +1,15 @@
-from surface.polygon import Point
-from svgwrite        import Drawing, rgb
-from svgwrite.shapes import Polygon, Circle, Line
+from surface.polygon                            import Point
+from control.planning.global_planning.smoothing import Smoother
+from svgwrite                                   import Drawing, rgb
+from svgwrite.shapes                            import Polygon, Circle, Line
+from numpy           import array
 
 
 
 
 
 def create_svg(filename, surface, controls_sequence = None, sn = None):
-	a = (0.0, 64.0, 0.0, 64.0)
+	a = (0.0, 40.0, 0.0, 40.0)
 	b = (1500.0, 1500.0, 10.0)
 
 
@@ -97,7 +99,10 @@ def create_svg(filename, surface, controls_sequence = None, sn = None):
 			
 			
 	if controls_sequence is not None:
+		last_state          = None
 		last_polygon_center = None
+		smoother            = Smoother(surface = surface, smoothing_depth = 1)
+		
 		
 		for state in controls_sequence:
 			polygon = state.polygons_sequence[-1]
@@ -114,18 +119,75 @@ def create_svg(filename, surface, controls_sequence = None, sn = None):
 			surface_view.add(polygon_center_view)
 			
 			
-			if last_polygon_center is not None:
-				trek_view = \
+			if last_state is not None:
+				smoother.push_transfer(
+					last_state.get_transfer(state)
+				)
+				
+				first_transfer_point, second_transfer_point = \
+					smoother.transfers_points_sequence[0]
+					
+					
+				first_trek_view = \
 					Line(
-						correct_vertex(polygon_center, a, b),
 						correct_vertex(last_polygon_center, a, b),
+						correct_vertex(
+							(first_transfer_point.coordinates[0],
+								first_transfer_point.coordinates[1]),
+							a,
+							b
+						),
 						stroke_width = 1,
 						stroke       = rgb(0, 0, 0),
 					)
 					
-				surface_view.add(trek_view)
+				first_trek_end_view = \
+					Circle(
+						correct_vertex(
+							(first_transfer_point.coordinates[0],
+								first_transfer_point.coordinates[1]),
+							a,
+							b
+						),
+						2,
+						stroke_width = 0,
+						fill         = rgb(0, 0, 0),
+					)
+					
+				second_trek_view = \
+					Line(
+						correct_vertex(
+							(second_transfer_point.coordinates[0],
+								second_transfer_point.coordinates[1]),
+							a,
+							b
+						),
+						correct_vertex(polygon_center, a, b),
+						stroke_width = 1,
+						stroke       = rgb(0, 0, 0),
+					)
+					
+				second_trek_start_view = \
+					Circle(
+						correct_vertex(
+							(second_transfer_point.coordinates[0],
+								second_transfer_point.coordinates[1]),
+							a,
+							b
+						),
+						2,
+						stroke_width = 0,
+						fill         = rgb(0, 0, 0),
+					)
+					
+					
+				surface_view.add(first_trek_view)
+				surface_view.add(first_trek_end_view)
+				surface_view.add(second_trek_view)
+				surface_view.add(second_trek_start_view)
 				
 				
+			last_state          = state
 			last_polygon_center = polygon_center
 			
 			
