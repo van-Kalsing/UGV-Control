@@ -132,13 +132,13 @@ from surface_generation import generate_surface
 from surface_building import build_surface
 
 start_time = round(time() * 1000)
-generate_surface('surface.csv', 40, 40, 1.0)
+generate_surface('output/surface.csv', 15, 15, 1.0)
 end_time = round(time() * 1000)
 print('Время генерации карты:    %s' % (end_time - start_time))
 
 
 start_time = round(time() * 1000)
-surface = build_surface('surface.csv', 0.0001)
+surface = build_surface('output/surface.csv', 0.0001)
 end_time = round(time() * 1000)
 print('Время загрузки карты:     %s' % (end_time - start_time))
 
@@ -157,4 +157,4 @@ end_time = round(time() * 1000)
 print('Время планирования пути:  %s' % (end_time - start_time))
 print('Стоимость пути:           %s' % cost)
 
-create_svg("test1.svg", surface, controls_sequence)
+create_svg("output/output.svg", surface, controls_sequence)

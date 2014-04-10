@@ -9,7 +9,7 @@ from numpy           import array
 
 
 def create_svg(filename, surface, controls_sequence = None, sn = None):
-	a = (0.0, 40.0, 0.0, 40.0)
+	a = (0.0, 15.0, 0.0, 15.0)
 	b = (1500.0, 1500.0, 10.0)
 
 
