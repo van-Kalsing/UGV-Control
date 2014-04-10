@@ -1,6 +1,6 @@
-from collections                                  import namedtuple
-from control.planning.global_planning.state_space import State
-from control.planning.global_planning.smoothing   import Smoother			
+from collections                          import namedtuple
+from planning.global_planning.smoothing   import Smoother			
+from planning.global_planning.state_space import State
 
 
 
@@ -8,152 +8,42 @@ from control.planning.global_planning.smoothing   import Smoother
 
 
 
-class PlanningParameters:
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-		
-		
-		self.__surface         = None
-		self.__initial_polygon = None
-		self.__final_polygon   = None
-		self.__smoothing_depth = None
-		
-		
-		
-	def copy(self):
-		planning_parameters = PlanningParameters()
-		
-		planning_parameters.__surface         = self.__surface
-		planning_parameters.__initial_polygon = self.__initial_polygon
-		planning_parameters.__final_polygon   = self.__final_polygon
-		planning_parameters.__smoothing_depth = self.__smoothing_depth
-		
-		
-		return planning_parameters
+_StateNodeBase = \
+	namedtuple(
+		'NodeBase',
+		[
+			'state',
+			'cost',
+			'marked_input_transfers',
+			'input_transfers',
+			'output_transfers',
+			'smoother'
+		]
+	)
+	
+class _StateNode(_StateNodeBase):
+	def __hash__(self):
+		return hash(self.state)
 		
 		
 		
-	def __eq__(self, planning_parameters):
-		return True #!!!!!
-		
-		
-	def __ne__(self, planning_parameters):
-		return not self.__eq__(planning_parameters)
-		
-		
-		
-	@property
-	def is_correct(self):
-		is_correct = True
-		
-		
-		is_correct &= self.__surface is not None
-		is_correct &= self.__initial_polygon is not None
-		is_correct &= self.__final_polygon is not None
-		is_correct &= self.__smoothing_depth is not None
-		
-		if is_correct:
-			is_correct &= self.__smoothing_depth > 0
-			
-			is_correct &= \
-				self.__surface.contains_polygon(
-					self.__initial_polygon
-				)
-				
-			is_correct &= \
-				self.__surface.contains_polygon(
-					self.__final_polygon
-				)
-				
-				
-		return is_correct
-		
-		
-		
-	@property
-	def surface(self):
-		return self.__surface
-		
-		
-	@surface.setter
-	def surface(self, surface):
-		self.__surface = surface
-		
-		
-		
-	@property
-	def initial_polygon(self):
-		return self.__initial_polygon
-		
-		
-	@initial_polygon.setter
-	def initial_polygon(self, initial_polygon):
-		self.__initial_polygon = initial_polygon
-		
-		
-		
-	@property
-	def final_polygon(self):
-		return self.__final_polygon
-		
-		
-	@final_polygon.setter
-	def final_polygon(self, final_polygon):
-		self.__final_polygon = final_polygon
-		
-		
-		
-	@property
-	def smoothing_depth(self):
-		return self.__smoothing_depth
-		
-		
-	@smoothing_depth.setter
-	def smoothing_depth(self, smoothing_depth):
-		self.__smoothing_depth = smoothing_depth
-		
-		
-		
-		
-		
-		
-		
-class Planner:
-	__StateNodeBase = \
-		namedtuple(
-			'NodeBase',
-			[
-				'state',
-				'cost',
-				'marked_input_transfers',
-				'input_transfers',
-				'output_transfers',
-				'smoother'
-			]
-		)
-		
-	class __StateNode(__StateNodeBase):
-		def __hash__(self):
-			return hash(self.state)
-			
-			
-			
-	__TransferNode = \
-		namedtuple(
-			'Transfer',
-			[
-				'cost',
-				'predecessor_node',
-				'successor_node'
-			]
-		)
-		
-		
-		
-		
-		
-		
-		
+_TransferNode = \
+	namedtuple(
+		'Transfer',
+		[
+			'cost',
+			'predecessor_node',
+			'successor_node'
+		]
+	)
+	
+	
+	
+	
+	
+	
+	
+class AStarPlanner:
 	def __init__(self, planning_parameters, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		
@@ -196,7 +86,7 @@ class Planner:
 			
 		def form_state_node(state, cost = None, smoother = None):
 			state_node = \
-				Planner.__StateNode(
+				_StateNode(
 					state                  = state,
 					cost                   = [cost],
 					marked_input_transfers = set(),
@@ -218,7 +108,7 @@ class Planner:
 			successor_smoother.push_transfer(transfer)
 			
 			transfer_node = \
-				Planner.__TransferNode(
+				_TransferNode(
 					cost             = successor_smoother.transfer_cost,
 					predecessor_node = predecessor_node,
 					successor_node   = successor_node

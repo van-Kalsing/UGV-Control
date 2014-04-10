@@ -1,7 +1,7 @@
-from surface.polygon                            import Point
-from control.planning.global_planning.smoothing import Smoother
-from svgwrite                                   import Drawing, rgb
-from svgwrite.shapes                            import Polygon, Circle, Line
+from surface.polygon                    import Point
+from planning.global_planning.smoothing import Smoother
+from svgwrite                           import Drawing, rgb
+from svgwrite.shapes                    import Polygon, Circle, Line
 from numpy           import array
 
 

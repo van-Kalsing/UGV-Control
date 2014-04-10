@@ -1,6 +1,6 @@
-from control.planning.global_planning.planning \
+from planning.global_planning.planning \
 	import PlanningParameters, \
-				Planner
+				plan
 				
 from surface_building import build_surface
 from surface.polygon  import Polygon, Point
@@ -46,6 +46,8 @@ print('Время загрузки карты:     %s' % surface_building_time)
 # Установка параметров планирования пути
 planning_parameters                 = PlanningParameters()
 planning_parameters.surface         = surface
+planning_parameters.planner         = "ant-colony-planner"
+# planning_parameters.planner         = "a-star-planner"
 planning_parameters.initial_polygon = list(surface.polygons)[0]
 planning_parameters.final_polygon   = list(surface.polygons)[-1]
 planning_parameters.smoothing_depth = 1
@@ -53,12 +55,10 @@ planning_parameters.smoothing_depth = 1
 
 
 # Планирование пути
-planner = Planner(planning_parameters)
-
 planning_result, planning_time = \
 	measure_time_usage(
-		Planner.plan_controls_sequence,
-		planner
+		plan,
+		planning_parameters
 	)
 	
 controls_sequence, cost = planning_result
