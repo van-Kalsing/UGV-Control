@@ -267,8 +267,12 @@ class Smoother:
 						range(1, ratios_sequence_length)
 					)
 					
+					
 				yield 0, None
-				yield from ratios_indexes_pairs
+				
+				for ratios_indexes_pair in ratios_indexes_pairs:
+					yield ratios_indexes_pair
+					
 				yield None, ratios_sequence_length - 1
 				
 				

@@ -1,13 +1,16 @@
 def memoization(function):
-	function_value = [None]
-	is_memorized   = [False]
+	function_value = None
+	is_memorized   = False
 	
 	def memoization_function(*args, **kwargs):
-		if not is_memorized[0]:
-			function_value[0] = function(*args, **kwargs)
-			is_memorized[0]   = True
+		nonlocal function_value
+		nonlocal is_memorized
+		
+		if not is_memorized:
+			function_value = function(*args, **kwargs)
+			is_memorized   = True
 			
-		return function_value[0]
+		return function_value
 		
 		
 	return memoization_function

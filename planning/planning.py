@@ -39,7 +39,7 @@ surface, surface_building_time = \
 		0.0001
 	)
 	
-print('Время загрузки карты:     %s' % surface_building_time)
+# print('Время загрузки карты:     %s' % surface_building_time)
 
 
 
@@ -63,8 +63,8 @@ planning_result, planning_time = \
 	
 controls_sequence, cost = planning_result
 
-print('Время планирования пути:  %s' % planning_time)
-print('Стоимость пути:           %s' % cost)
+# print('Время планирования пути:  %s' % planning_time)
+# print('Стоимость пути:           %s' % cost)
 
 
 

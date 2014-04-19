@@ -10,55 +10,83 @@ from utilities.memoization import memoization
 
 
 class State:
+	__states_cache = dict()
+	
+	
+	
+	def __new__(cls, polygons_sequence, *args, **kwargs):
+		states_cache_key = tuple(polygons_sequence)
+		
+		if states_cache_key in cls.__states_cache:
+			states_cache_value = cls.__states_cache[states_cache_key]
+		else:
+			states_cache_value = super().__new__(cls)
+			states_cache_value.__is_initialized = False
+			states_cache_value.a = 0
+			
+			cls.__states_cache[states_cache_key] = states_cache_value
+			
+			
+		return states_cache_value
+		
+		
+		
+		
+		
 	def __init__(self, polygons_sequence, planning_parameters, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		
 		
-		#!!!!! 1. Послед-но ли распложены полигоны не проверять - долго считает
-		#!!!!!    (указать на это при документировании)
-		#!!!!! 2. Проверять число полигонов - оно должно быть равно
-		#!!!!!    соответствующему параметру в planning_parameters, также оно
-		#!!!!!    может быть меньше его в случае, если первый полигон стартовый
-		
-		if not planning_parameters.is_correct:
-			raise Exception() #!!!!!
+		if not self.__is_initialized:
+			#!!!!! 1. Послед-но ли распложены полигоны не проверять - долго
+			#!!!!!    считает (указать на это при документировании)
+			#!!!!! 2. Проверять число полигонов - оно должно быть равно
+			#!!!!!    соответствующему параметру в planning_parameters, также
+			#!!!!!    оно может быть меньше его в случае, если первый полигон
+			#!!!!!    стартовый
 			
-		try:
-			def get_existing_polygon(polygon):
-				existing_polygon = \
-					planning_parameters.surface \
-						.get_existing_polygon(
-							polygon
-						)
-						
-				return existing_polygon
+			if not planning_parameters.is_correct:
+				raise Exception() #!!!!!
 				
-			surface_polygons_sequence = \
-				[get_existing_polygon(polygon) for polygon \
-					in polygons_sequence]
-		except:
-			raise Exception() #!!!!!
+			try:
+				def get_existing_polygon(polygon):
+					existing_polygon = \
+						planning_parameters.surface \
+							.get_existing_polygon(
+								polygon
+							)
+							
+					return existing_polygon
+					
+				surface_polygons_sequence = \
+					[get_existing_polygon(polygon) for polygon \
+						in polygons_sequence]
+			except:
+				raise Exception() #!!!!!
+				
+				
+			planning_parameters = planning_parameters.copy()
+			polygons_sequence   = list(polygons_sequence)
+			surface             = planning_parameters.surface
 			
-		planning_parameters = planning_parameters.copy()
-		polygons_sequence   = list(polygons_sequence)
-		surface             = planning_parameters.surface
-		
-		
-		self.__planning_parameters       = planning_parameters
-		self.__polygons_sequence         = polygons_sequence
-		self.__surface                   = surface
-		self.__surface_polygons_sequence = surface_polygons_sequence
-		
-		self.__hash               = memoization(self.__hash)
-		self.__get_successors_map = memoization(self.__get_successors_map)
-		self.__is_initial         = memoization(self.__is_initial)
-		self.__is_final           = memoization(self.__is_final)
-		self.__estimation         = memoization(self.__estimation)
-		
-		
-		
-		
-		
+			self.__planning_parameters       = planning_parameters
+			self.__polygons_sequence         = polygons_sequence
+			self.__surface                   = surface
+			self.__surface_polygons_sequence = surface_polygons_sequence
+			
+			self.__hash               = memoization(self.__hash)
+			self.__get_successors_map = memoization(self.__get_successors_map)
+			self.__is_initial         = memoization(self.__is_initial)
+			self.__is_final           = memoization(self.__is_final)
+			self.__estimation         = memoization(self.__estimation)
+			
+			
+			self.__is_initialized = True
+			
+			
+			
+			
+			
 	def __hash(self):
 		#!!!!! Потом убрать array
 		polygons_centers_total_norm = \
@@ -82,15 +110,20 @@ class State:
 	def __eq__(self, state):
 		if state.__planning_parameters == self.__planning_parameters:
 			def iterate_surface_polygons():
-				yield from \
+				surface_polygons = \
 					zip(
 						self.__surface_polygons_sequence,
 						state.__surface_polygons_sequence
 					)
 					
-			for surface_polygons in iterate_surface_polygons():
-				first_surface_polygon, second_surface_polygon = surface_polygons
-				
+				for surface_polygons_pair in surface_polygons:
+					yield surface_polygons_pair
+					
+					
+			for surface_polygons_pair in iterate_surface_polygons():
+				first_surface_polygon, second_surface_polygon = \
+					surface_polygons_pair
+					
 				are_polygons_equivalent = \
 					match_polygons(
 						first_surface_polygon,
@@ -172,10 +205,13 @@ class State:
 		
 	@property
 	def successors(self):
-		yield from self.__get_successors_map()
+		successors_map = self.__get_successors_map()
 		
-		
-		
+		for successor in successors_map.keys():
+			yield successor
+			
+			
+			
 	def get_transfer(self, successor):
 		successors_map = self.__get_successors_map()
 		transfer       = successors_map.get(successor)

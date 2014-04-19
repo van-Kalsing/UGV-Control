@@ -133,9 +133,12 @@ class AntColonyPlanner:
 		
 		import sys
 		import visualization.visualization as visualization
-		while True:
-			for _ in range(5):
+		for _ in range(5000):
+			for _ in range(1):
 				path, path_cost = find_path(initial_state)
+				#!!!!! <Верменно>
+				print(path_cost)
+				#!!!!! </Верменно>
 				
 				if (best_path is None) or (path_cost < best_path_cost):
 					best_path      = path
@@ -169,16 +172,16 @@ class AntColonyPlanner:
 					
 					
 					
-			print('Стоимость пути: %s' % best_path_cost)
-			visualization.create_svg(
-				"output/output.svg",
-				self.__planning_parameters.surface,
-				best_path
-			)
+			# print('Стоимость пути: %s' % best_path_cost)
+			# visualization.create_svg(
+			# 	"output/output.svg",
+			# 	self.__planning_parameters.surface,
+			# 	best_path
+			# )
 			
-			print("continue?")
-			if sys.stdin.readline() == "n\n":
-				break
+			# print("continue?")
+			# if sys.stdin.readline() == "n\n":
+			# 	break
 				
 				
 				
