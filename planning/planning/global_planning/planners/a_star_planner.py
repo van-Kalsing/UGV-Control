@@ -1,6 +1,6 @@
-from collections                          import namedtuple
-from planning.global_planning.smoothing   import Smoother			
-from planning.global_planning.state_space import State
+from collections                                   import namedtuple
+from planning.planning.global_planning.smoothing   import Smoother			
+from planning.planning.global_planning.state_space import State
 
 
 

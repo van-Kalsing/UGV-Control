@@ -1,7 +1,7 @@
-from numpy                 import array
-from numpy.linalg          import norm
-from surface.polygon       import match_polygons
-from utilities.memoization import memoization
+from numpy                          import array
+from numpy.linalg                   import norm
+from planning.surface.polygon       import match_polygons
+from planning.utilities.memoization import memoization
 
 
 

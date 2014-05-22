@@ -1,8 +1,11 @@
-from planning.global_planning.planners.a_star_planner \
+from planning.planning.global_planning.planners.a_star_planner \
 	import AStarPlanner
 	
-from planning.global_planning.planners.ant_colony_planner \
-	import AntColonyPlanner
+# from planning.global_planning.planners.progressive_a_star_planner \
+# 	import ProgressiveAStarPlanner
+	
+# from planning.global_planning.planners.ant_colony_planner \
+# 	import AntColonyPlanner
 	
 	
 	
@@ -137,6 +140,10 @@ class PlanningParameters:
 def plan(planning_parameters):
 	if planning_parameters.planner == "a-star-planner":
 		planner = AStarPlanner(planning_parameters)
+		result  = planner.plan_controls_sequence()
+		
+	elif planning_parameters.planner == "progressive-a-star-planner":
+		planner = ProgressiveAStarPlanner(planning_parameters)
 		result  = planner.plan_controls_sequence()
 		
 	elif planning_parameters.planner == "ant-colony-planner":

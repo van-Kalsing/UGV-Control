@@ -1,7 +1,7 @@
-from collections     import deque
-from numpy           import array
-from numpy.linalg    import norm
-from surface.polygon import Point
+from collections              import deque
+from numpy                    import array
+from numpy.linalg             import norm
+from planning.surface.polygon import Point
 
 
 
@@ -301,6 +301,10 @@ class Smoother:
 		
 		
 	def __minimize_ratio(self, ratio_index):
+		#!!!!! <Временно>
+		# self.__ratios_sequence[ratio_index] = 0.5
+		# return 0.0
+		#!!!!! <!Временно>
 		factor = (3.0 - 5.0 ** 0.5) / 2.0
 		
 		left_bound, right_bound         = 0.0, 1.0

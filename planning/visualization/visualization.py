@@ -1,19 +1,35 @@
-from surface.polygon                    import Point
-from planning.global_planning.smoothing import Smoother
-from svgwrite                           import Drawing, rgb
-from svgwrite.shapes                    import Polygon, Circle, Line
-from numpy           import array
+from planning.surface.polygon import Point
+from svgwrite                 import Drawing, rgb
+from svgwrite.shapes          import Polygon, Circle, Line
+from svgwrite.text            import Text
+from numpy                    import array
+
+from planning.planning.global_planning.smoothing \
+	import Smoother
+	
+	
+	
+	
+	
+def create_svg(file, surface, controls_sequence = None, sn = None):
+	min_x, max_x = None, None
+	min_y, max_y = None, None
+	
+	for polygon in surface.polygons:
+		for vertex in polygon.vertices:
+			if min_x is None:
+				min_x, max_x = vertex[0], vertex[0]
+				min_y, max_y = vertex[1], vertex[1]
+			else:
+				min_x, max_x = min(vertex[0], min_x), max(vertex[0], max_x)
+				min_y, max_y = min(vertex[1], min_y), max(vertex[1], max_y)
+				
+				
+	a = (min_x, max_x, min_y, max_y)
+	b = (max_x - min_x, max_y - min_y, 10.0)
 
 
-
-
-
-def create_svg(filename, surface, controls_sequence = None, sn = None):
-	a = (0.0, 10.0, 0.0, 10.0)
-	b = (400.0, 400.0, 10.0)
-
-
-	surface_view = Drawing(filename, size = (400, 400))
+	surface_view = Drawing(size = (max_x - min_x, max_y - min_y))
 	
 	
 	def correct_vertex(vertex, surface_bounds, canvas_bounds):
@@ -81,21 +97,36 @@ def create_svg(filename, surface, controls_sequence = None, sn = None):
 		
 		
 	if sn is not None:
-		from svgwrite.text import Text
-		for state in sn:
-			polygon = state.polygon
-			polygon_number = sn[state]
-			
-			polygon_center      = polygon.center[0], polygon.center[1]
-			q,w = correct_vertex(polygon_center, a, b)
-			polygon_center_view = \
+		for polygon_index, polygon in enumerate(surface.polygons):
+			polygon_index_view = \
 				Text(
-					str(polygon_number),
-					insert = (q+2,w+2),
-					style = "font-size: 50%; font-color: #808080"
+					str(polygon_index),
+					insert = \
+						correct_vertex(
+							(polygon.center[0], polygon.center[1]),
+							a, b
+						)
 				)
 				
-			surface_view.add(polygon_center_view)
+			surface_view.add(polygon_index_view)
+			
+			
+	# if sn is not None:
+	# 	from svgwrite.text import Text
+	# 	for state in sn:
+	# 		polygon = state.polygon
+	# 		polygon_number = sn[state]
+			
+	# 		polygon_center      = polygon.center[0], polygon.center[1]
+	# 		q,w = correct_vertex(polygon_center, a, b)
+	# 		polygon_center_view = \
+	# 			Text(
+	# 				str(polygon_number),
+	# 				insert = (q+2,w+2),
+	# 				style = "font-size: 50%; font-color: #808080"
+	# 			)
+				
+	# 		surface_view.add(polygon_center_view)
 			
 			
 	if controls_sequence is not None:
@@ -191,5 +222,5 @@ def create_svg(filename, surface, controls_sequence = None, sn = None):
 			last_polygon_center = polygon_center
 			
 			
-	surface_view.save()
+	surface_view.write(file)
 	

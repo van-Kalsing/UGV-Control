@@ -1,4 +1,4 @@
-from surface.polygon \
+from planning.surface.polygon \
 	import Edge, \
 				match_coordinates, \
 				match_polygons, \
@@ -140,7 +140,7 @@ class Surface:
 		
 		
 		
-	def add_polygon(self, polygon):
+	def add_polygon(self, polygon, map_polygon_index):
 		#!!!!! Проверить отдаленность вершин (двойная разрешающая способность)
 		
 		
@@ -153,8 +153,9 @@ class Surface:
 		if polygon_record is None:
 			polygon_record = \
 				{
-					'polygon':   polygon,
-					'relations': {}
+					'polygon':           polygon,
+					'relations':         {},
+					'map_polygon_index': map_polygon_index
 				}
 				
 			self.__polygons_records.insert(polygon_record_index, polygon_record)
@@ -194,6 +195,23 @@ class Surface:
 			
 			
 		return existing_polygon
+		
+		
+		
+	def get_map_polygon_index(self, polygon):
+		_, polygon_record = \
+			self.__get_polygon_record(
+				polygon,
+				self.__equivalence_distance
+			)
+			
+		if polygon_record is not None:
+			map_polygon_index = polygon_record['map_polygon_index']
+		else:
+			raise Exception() #!!!!!
+			
+			
+		return map_polygon_index
 		
 		
 		

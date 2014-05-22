@@ -1,7 +1,7 @@
-from csv             import reader
-from re              import compile
-from surface.polygon import Polygon, Edge, invert_edge
-from surface.surface import Surface
+from csv                      import reader
+from re                       import compile
+from planning.surface.polygon import Polygon, Edge, invert_edge
+from planning.surface.surface import Surface
 
 
 
@@ -9,7 +9,7 @@ from surface.surface import Surface
 
 
 
-def build_surface(file_name, equivalence_distance):
+def build_surface(csv_file, equivalence_distance):
 	surface  = Surface(equivalence_distance)
 	polygons = []
 	
@@ -96,29 +96,28 @@ def build_surface(file_name, equivalence_distance):
 		
 		
 	#!!!!! Обрабатывать исключения в случае ошибки файла
-	with open(file_name) as csv_file:
-		csv_file_reader = reader(csv_file, delimiter = ';')
+	csv_file_reader = reader(csv_file, delimiter = ';')
+	
+	for csv_record_index, csv_record in enumerate(csv_file_reader):
+		vertices_record      = csv_record[0]
+		relations_record     = csv_record[1]
+		impassibility_record = csv_record[2]
 		
-		for csv_record in csv_file_reader:
-			vertices_record      = csv_record[0]
-			relations_record     = csv_record[1]
-			impassibility_record = csv_record[2]
-			
-			polygon   = get_polygon(vertices_record, impassibility_record)
-			relations = get_relations(polygon, relations_record)
-			
-			
-			surface.add_polygon(polygon)
-			
-			for first_edge, second_edge in relations:
-				surface.set_relation(first_edge, invert_edge(second_edge))
-				
-				
-			polygons.append(polygon)
-		# try:
-		# except:
-		# 	raise Exception() #!!!!!
+		polygon   = get_polygon(vertices_record, impassibility_record)
+		relations = get_relations(polygon, relations_record)
+		
+		
+		surface.add_polygon(polygon, csv_record_index)
+		
+		for first_edge, second_edge in relations:
+			surface.set_relation(first_edge, invert_edge(second_edge))
 			
 			
+		polygons.append(polygon)
+	# try:
+	# except:
+	# 	raise Exception() #!!!!!
+		
+		
 	return surface
 	
