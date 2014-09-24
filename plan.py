@@ -235,6 +235,12 @@ if __name__ == "__main__":
 		
 		
 		
+	#!!!!!<Временно>
+	from planning.planning.local_planning.trajectory_planning import plan
+	polygons_sequence = \
+		[state.polygons_sequence[-1] for state in states_sequence]
+	plan(surface, states_sequence, tuple(arguments.start), tuple(arguments.goal))
+	#!!!!!</Временно>
 	# Визуализация
 	if arguments.visualization is not None:
 		if not check_module_presence("svgwrite"):
