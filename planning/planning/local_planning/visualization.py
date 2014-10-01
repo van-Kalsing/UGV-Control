@@ -7,13 +7,12 @@ from PIL import Image, ImageDraw
 
 
 def visualize_trajectory(trajectories, polygons):
-	image_width  = 500
-	image_height = 500
+	image_size = 2500
 	
 	image = \
 		Image.new(
 			mode  = "RGB",
-			size  = (image_width, image_height),
+			size  = (image_size, image_size),
 			color = (255, 255, 255)
 		)
 		
@@ -50,7 +49,7 @@ def visualize_trajectory(trajectories, polygons):
 	min_y = min(points_y)
 	max_y = max(points_y)
 	
-	scale = 500.0 / max(max_x - min_x, max_y - min_y)
+	scale = image_size / max(max_x - min_x, max_y - min_y)
 	
 	
 	
@@ -65,7 +64,7 @@ def visualize_trajectory(trajectories, polygons):
 			point = point.real, point.imag
 			point = \
 				int((point[0] - min_x) * scale), \
-					image_height - int((point[1] - min_y) * scale)
+					image_size - int((point[1] - min_y) * scale)
 					
 			if is_first:
 				is_first = False
@@ -96,13 +95,13 @@ def visualize_trajectory(trajectories, polygons):
 		last_vertex = polygon.vertices[-1].real, polygon.vertices[-1].imag
 		last_vertex = \
 			int((last_vertex[0] - min_x) * scale), \
-				image_height - int((last_vertex[1] - min_y) * scale)
+				image_size - int((last_vertex[1] - min_y) * scale)
 		
 		for vertex in polygon.vertices:
 			vertex = vertex.real, vertex.imag
 			vertex = \
 				int((vertex[0] - min_x) * scale), \
-					image_height - int((vertex[1] - min_y) * scale)
+					image_size - int((vertex[1] - min_y) * scale)
 					
 			image_draw.line(
 				last_vertex + vertex,
@@ -115,5 +114,5 @@ def visualize_trajectory(trajectories, polygons):
 			
 			
 			
-	image.show()
+	image.save("qwerty.png")
 	

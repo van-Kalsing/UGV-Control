@@ -38,13 +38,15 @@ def compute_segment(polygon, start_state, goal_state, factor):
 		o = Line.compute_intersection(ls, lg)
 		
 	elif not Line.are_equivalent(ls, lg):
-		if delta_s / abs(delta_s) == delta_g / abs(delta_g):
+		# if delta_s / abs(delta_s) == delta_g / abs(delta_g):
+		if abs(delta_s / abs(delta_s) - delta_g / abs(delta_g)) < 1.0:
 			return None
 		else:
 			o = (s + g) / 2.0
 			
 	else:
-		if delta_s / abs(delta_s) == delta_g / abs(delta_g):
+		# if delta_s / abs(delta_s) == delta_g / abs(delta_g):
+		if abs(delta_s / abs(delta_s) - delta_g / abs(delta_g)) < 1.0:
 			if ((g - s) / delta_s).real < 0.0:
 				return None
 				
